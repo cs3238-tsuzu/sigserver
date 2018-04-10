@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+service Listener {
+    rpc Register(RegisterParameters) returns (RegisterResults);
+    rpc Unregister(ListenParameters) returns (UnregisterResults);
+
+    rpc Listen(ListenParameters) returns (stream ListenResults);
+    rpc Connect(ConnectParameters) returns (ConnectResults);
+
+    rpc Communicate(stream CommunicateParameters) returns (stream CommunicateResults);
+}
+
+message RegisterParameters {
+    string Key = 1;
+    string AuthToken = 2; // optional
+}
+
+message RegisterResults {
+    string Token = 1; 
+    int64 MaxAge = 2; // in seconds(<0: unlimited)
+}
+
+message UnregisterResults {}
+
+message ListenParameters {
+    string Key = 1;
+    string Token = 2;
+}
+
+message ListenResults {
+    string Identifier = 1;
+    int32 MaxMessages = 2;
+    int32 MaxLength = 3; // bytes
+    string Timelimit = 4; //RFC3339
+}
+
+message CommunicateParameters {
+    oneof param {
+        // Only necessary for the first time
+        string Identifier = 1;
+        string Message = 2;
+    }
+}
+
+message CommunicateResults {
+    string Message = 1;
+    int32 LeftMessages = 2;
+}
+
+message ConnectParameters {
+    string Key = 1;
+}
+
+message ConnectResults {
+    string Identifier = 1;
+    int32 MaxMessages = 2;
+    int32 MaxLength = 3;
+    string Timelimit = 4;
+}

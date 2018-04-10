@@ -1,0 +1,22 @@
+# [server]
+#  address = "0.0.0.0:8080"
+#  store = "bolt" # bolt or in-memory
+#  communicate_timeout = "15s"
+#  max_length = 10240 # [bytes] 0 is unlimited
+#  max_messages = 6 # 0 is unlimited
+#  registration_timeout = "240h" # h, m, s, ms
+#
+#  [[server.certificates]]
+#    certFile = "/path/to/cert"
+#    keyFile = "/path/to/key"
+
+#[bolt]
+#file = "/path/to/boltdb"
+
+[server]
+  address = "0.0.0.0:8080"
+  store = "in-memory"
+  communicate_timeout = "15s"
+  max_length = 10240
+  max_messages = 6
+  registration_timeout = "240h"
