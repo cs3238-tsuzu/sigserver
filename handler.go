@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"math"
-	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -53,6 +52,10 @@ func NewHandler(config *Config) (*Handler, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	if err := kv.Run(); err != nil {
+		return nil, err
 	}
 
 	kv.SetTimeout(config.Server.registrationTimeout)
@@ -123,6 +126,7 @@ func (h *Handler) Listen(param *api.ListenParameters, listenServer api.Listener_
 	for {
 		select {
 		case data := <-dataChan:
+			fmt.Println(data)
 			err := listenServer.Send(&api.ListenResults{
 				Identifier:  data.identifier,
 				Timelimit:   data.timelimit.Format(time.RFC3339),
@@ -133,6 +137,7 @@ func (h *Handler) Listen(param *api.ListenParameters, listenServer api.Listener_
 			if err != nil {
 				return err
 			}
+			fmt.Println(err)
 		case <-ctx.Done():
 			return nil
 		}
@@ -275,11 +280,11 @@ func (h *Handler) Communicate(communicateServer api.Listener_CommunicateServer) 
 	return nil
 }
 
-func initHandler(config *Config) (*grpc.Server, error) {
+func initHandler(config *Config) (*Handler, *grpc.Server, error) {
 	handler, err := NewHandler(config)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create new handler")
+		return nil, nil, errors.Wrap(err, "failed to create new handler")
 	}
 
 	opts := []grpc.ServerOption{}
@@ -288,9 +293,7 @@ func initHandler(config *Config) (*grpc.Server, error) {
 		cred, err := credentials.NewServerTLSFromFile(v.CertFile, v.KeyFile)
 
 		if err != nil {
-			log.Println("Loading X509 files error:", err)
-
-			os.Exit(1)
+			return nil, nil, fmt.Errorf("Loading X509 files error: %v", err)
 		}
 
 		opts = append(opts, grpc.Creds(cred))
@@ -302,5 +305,5 @@ func initHandler(config *Config) (*grpc.Server, error) {
 
 	reflection.Register(s)
 
-	return s, nil
+	return handler, s, nil
 }

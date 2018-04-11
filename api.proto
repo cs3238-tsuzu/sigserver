@@ -1,4 +1,7 @@
 syntax = "proto3";
+package api;
+
+// protoc --go_out=plugins=grpc:./api api.proto
 
 service Listener {
     rpc Register(RegisterParameters) returns (RegisterResults);

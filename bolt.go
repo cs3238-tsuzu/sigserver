@@ -54,6 +54,7 @@ func (b *Bolt) do(f func(b *bolt.Bucket) error) error {
 
 func (l *Bolt) Run() error {
 	go func() {
+		defer l.db.Close()
 		for {
 			l.mut.Lock()
 			timeout := l.timeout

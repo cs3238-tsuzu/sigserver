@@ -5,7 +5,7 @@ import (
 	"math/big"
 )
 
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_/><,.?@|{}[]`*:;!#$%&()=-^~"
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" //_/><,.?@|{}[]`*:;!#$%&()=-^~"
 
 func randomSecurePassword() string {
 	b := make([]byte, 64)

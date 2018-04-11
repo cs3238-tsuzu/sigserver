@@ -64,7 +64,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	handler, err := initHandler(&globalConfig)
+	handler, server, err := initHandler(&globalConfig)
 
 	if err != nil {
 		log.Fatalf("newHandler error: %v", err)
@@ -85,11 +85,20 @@ func main() {
 		for {
 			switch <-sigCh {
 			case syscall.SIGTERM, syscall.SIGINT, os.Interrupt:
-				handler.GracefulStop()
+				server.GracefulStop()
+
+				if handler.KV != nil {
+					handler.KV.Stop()
+				}
+
 				return
 			}
 		}
 	}()
 
-	log.Fatal(handler.Serve(listener))
+	log.Println("Listening started")
+
+	if err := server.Serve(listener); err != nil {
+		log.Fatal(err)
+	}
 }

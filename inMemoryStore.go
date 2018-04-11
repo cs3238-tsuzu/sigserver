@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -98,7 +99,7 @@ func (in *InMemory) Run() error {
 			func() {
 				in.mut.Lock()
 				timeout := in.timeout
-				defer in.mut.Unlock()
+				in.mut.Unlock()
 				t := time.NewTimer(timeout)
 
 				select {
@@ -108,6 +109,8 @@ func (in *InMemory) Run() error {
 				}
 				t.Stop()
 
+				in.mut.Lock()
+				defer in.mut.Unlock()
 				del := make([]string, 0, 10)
 				for k, v := range in.registered {
 					if v.IsTimeout(timeout) {
@@ -144,6 +147,7 @@ func (in *InMemory) Lock(key, token string) error {
 		return ErrUnknownKey
 	}
 
+	fmt.Println(key, token, v)
 	if v.token != token {
 		return ErrDifferentToken
 	}
