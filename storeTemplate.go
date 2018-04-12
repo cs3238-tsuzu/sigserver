@@ -20,11 +20,11 @@ type KeyValueStore interface {
 }
 
 type registeredData struct {
-	updatedAt time.Time
-	token     string
-	counter   int
+	UpdatedAt time.Time
+	Token     string
+	Counter   int
 }
 
 func (rd *registeredData) IsTimeout(d time.Duration) bool {
-	return rd.counter == 0 && time.Now().Sub(rd.updatedAt) > d
+	return rd.Counter == 0 && time.Now().Sub(rd.UpdatedAt) > d
 }

@@ -103,7 +103,7 @@ func (b *Bolt) Stop() error {
 
 func (b *Bolt) Register(k string) (res string, err error) {
 	err = b.do(func(b *bolt.Bucket) error {
-		if b.Get([]byte(k)) == nil {
+		if b.Get([]byte(k)) != nil {
 			return ErrAlreadyRegistered
 		}
 
@@ -111,9 +111,9 @@ func (b *Bolt) Register(k string) (res string, err error) {
 
 		j, _ := json.Marshal(
 			registeredData{
-				updatedAt: time.Now(),
-				token:     token,
-				counter:   0,
+				UpdatedAt: time.Now(),
+				Token:     token,
+				Counter:   0,
 			},
 		)
 
@@ -136,11 +136,11 @@ func (b *Bolt) Load(key, token string) (err error) {
 			return ErrUnknownKey
 		}
 
-		if token != rv.token {
+		if token != rv.Token {
 			return ErrDifferentToken
 		}
 
-		rv.updatedAt = time.Now()
+		rv.UpdatedAt = time.Now()
 
 		j, _ = json.Marshal(rv)
 
@@ -162,7 +162,7 @@ func (b *Bolt) Unregister(key, token string) (err error) {
 			return ErrUnknownKey
 		}
 
-		if token != rv.token {
+		if token != rv.Token {
 			return ErrDifferentToken
 		}
 
@@ -189,11 +189,11 @@ func (b *Bolt) Lock(key, token string) (err error) {
 			return ErrUnknownKey
 		}
 
-		if token != rv.token {
+		if token != rv.Token {
 			return ErrDifferentToken
 		}
 
-		rv.counter++
+		rv.Counter++
 
 		j, _ = json.Marshal(rv)
 
@@ -214,8 +214,8 @@ func (b *Bolt) Unlock(key string) (err error) {
 			return ErrUnknownKey
 		}
 
-		rv.counter--
-		rv.updatedAt = time.Now()
+		rv.Counter--
+		rv.UpdatedAt = time.Now()
 
 		j, _ = json.Marshal(rv)
 

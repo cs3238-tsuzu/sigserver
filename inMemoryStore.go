@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -28,8 +27,8 @@ func NewInMemory() *InMemory {
 
 func (in *InMemory) Register(key string) (string, error) {
 	random := registeredData{
-		token:     randomSecurePassword(),
-		updatedAt: time.Now(),
+		Token:     randomSecurePassword(),
+		UpdatedAt: time.Now(),
 	}
 
 	in.mut.Lock()
@@ -42,7 +41,7 @@ func (in *InMemory) Register(key string) (string, error) {
 	}
 
 	in.registered[key] = &random
-	return random.token, nil
+	return random.Token, nil
 }
 
 func (in *InMemory) Load(key, token string) error {
@@ -61,7 +60,7 @@ func (in *InMemory) Load(key, token string) error {
 		return ErrUnknownKey
 	}
 
-	if v.token != token {
+	if v.Token != token {
 		return ErrDifferentToken
 	}
 
@@ -78,7 +77,7 @@ func (in *InMemory) Unregister(key, token string) error {
 		return nil
 	}
 
-	if v.token != token {
+	if v.Token != token {
 		return ErrDifferentToken
 	}
 
@@ -151,13 +150,11 @@ func (in *InMemory) Lock(key, token string) error {
 		return ErrUnknownKey
 	}
 
-	log.Println(key, token, v)
-	log.Println(len(token), len(v.token))
-	if v.token != token {
+	if v.Token != token {
 		return ErrDifferentToken
 	}
 
-	v.counter++
+	v.Counter++
 
 	return nil
 }
@@ -171,8 +168,8 @@ func (in *InMemory) Unlock(key string) error {
 		return ErrUnknownKey
 	}
 
-	v.counter--
-	v.updatedAt = time.Now()
+	v.Counter--
+	v.UpdatedAt = time.Now()
 
 	return nil
 }
