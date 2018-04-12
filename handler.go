@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"sync"
 	"sync/atomic"
@@ -126,7 +127,7 @@ func (h *Handler) Listen(param *api.ListenParameters, listenServer api.Listener_
 	for {
 		select {
 		case data := <-dataChan:
-			fmt.Println(data)
+			log.Println(data)
 			err := listenServer.Send(&api.ListenResults{
 				Identifier:  data.identifier,
 				Timelimit:   data.timelimit.Format(time.RFC3339),
@@ -137,7 +138,7 @@ func (h *Handler) Listen(param *api.ListenParameters, listenServer api.Listener_
 			if err != nil {
 				return err
 			}
-			fmt.Println(err)
+			log.Println(err)
 		case <-ctx.Done():
 			return nil
 		}
@@ -170,17 +171,18 @@ func (h *Handler) Connect(ctx context.Context, param *api.ConnectParameters) (*a
 		Timelimit:   data.timelimit.Format(time.RFC3339),
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+
+	accepting := &acceptingData{
+		serverChan: make(chan api.Listener_CommunicateServer),
+		counter:    0,
+		ctx:        ctx,
+	}
+
+	h.accepting.Store(data.identifier, accepting)
+
 	go func() {
-		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-
-		accepting := &acceptingData{
-			serverChan: make(chan api.Listener_CommunicateServer),
-			counter:    0,
-			ctx:        ctx,
-		}
-
-		h.accepting.Store(data.identifier, accepting)
 
 		left := h.MaxMessages
 		peer1 := <-accepting.serverChan
@@ -213,7 +215,7 @@ func (h *Handler) Connect(ctx context.Context, param *api.ConnectParameters) (*a
 					return
 				}
 
-				new := atomic.AddInt32(&left, 1)
+				new := atomic.AddInt32(&left, -1)
 				val, ok := param.Param.(*api.CommunicateParameters_Message)
 
 				if !ok {
@@ -231,7 +233,7 @@ func (h *Handler) Connect(ctx context.Context, param *api.ConnectParameters) (*a
 					return
 				}
 
-				if new >= h.MaxMessages {
+				if new == 0 {
 					return
 				}
 			}

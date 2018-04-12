@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
+
+	"github.com/k0kubun/pp"
 )
 
 type InMemory struct {
 	mut        sync.Mutex
 	timeout    time.Duration
-	registered map[string]registeredData
+	registered map[string]*registeredData
 
 	closed chan struct{}
 }
@@ -17,7 +20,7 @@ type InMemory struct {
 func NewInMemory() *InMemory {
 	return &InMemory{
 		timeout:    1 * time.Minute,
-		registered: make(map[string]registeredData),
+		registered: make(map[string]*registeredData),
 
 		closed: make(chan struct{}),
 	}
@@ -38,7 +41,7 @@ func (in *InMemory) Register(key string) (string, error) {
 		return "", ErrAlreadyRegistered
 	}
 
-	in.registered[key] = random
+	in.registered[key] = &random
 	return random.token, nil
 }
 
@@ -100,7 +103,7 @@ func (in *InMemory) Run() error {
 				in.mut.Lock()
 				timeout := in.timeout
 				in.mut.Unlock()
-				t := time.NewTimer(timeout)
+				t := time.NewTimer(1 * time.Second)
 
 				select {
 				case <-t.C:
@@ -113,6 +116,7 @@ func (in *InMemory) Run() error {
 				defer in.mut.Unlock()
 				del := make([]string, 0, 10)
 				for k, v := range in.registered {
+					fmt.Println(k, ": ", pp.Sprint(v))
 					if v.IsTimeout(timeout) {
 						del = append(del, k)
 					}
@@ -147,7 +151,8 @@ func (in *InMemory) Lock(key, token string) error {
 		return ErrUnknownKey
 	}
 
-	fmt.Println(key, token, v)
+	log.Println(key, token, v)
+	log.Println(len(token), len(v.token))
 	if v.token != token {
 		return ErrDifferentToken
 	}
