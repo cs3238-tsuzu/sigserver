@@ -1,11 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 	"time"
-
-	"github.com/k0kubun/pp"
 )
 
 type InMemory struct {
@@ -115,7 +112,6 @@ func (in *InMemory) Run() error {
 				defer in.mut.Unlock()
 				del := make([]string, 0, 10)
 				for k, v := range in.registered {
-					fmt.Println(k, ": ", pp.Sprint(v))
 					if v.IsTimeout(timeout) {
 						del = append(del, k)
 					}
