@@ -57,6 +57,7 @@ func main() {
 
 		os.Exit(1)
 	}
+	fp.Close()
 
 	if err := validateConfig(&globalConfig); err != nil {
 		log.Println(err)
@@ -78,9 +79,12 @@ func main() {
 
 	go func() {
 		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh,
+		signal.Notify(
+			sigCh,
 			syscall.SIGTERM,
-			syscall.SIGINT)
+			syscall.SIGINT,
+			os.Interrupt,
+		)
 
 		for {
 			switch <-sigCh {

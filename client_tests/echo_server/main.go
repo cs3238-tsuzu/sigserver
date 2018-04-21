@@ -85,7 +85,7 @@ func main() {
 
 		log.Println("accepted: ", accepted)
 
-		func() {
+		go func() {
 			ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 			defer cancel()
 

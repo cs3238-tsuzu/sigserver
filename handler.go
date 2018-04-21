@@ -138,7 +138,6 @@ func (h *Handler) Listen(param *api.ListenParameters, listenServer api.Listener_
 			if err != nil {
 				return err
 			}
-			log.Println(err)
 		case <-ctx.Done():
 			return nil
 		}
