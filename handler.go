@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"google.golang.org/grpc/keepalive"
+
 	"github.com/pkg/errors"
 
 	"google.golang.org/grpc"
@@ -289,6 +291,12 @@ func initHandler(config *Config) (*Handler, *grpc.Server, error) {
 	}
 
 	opts := []grpc.ServerOption{}
+
+	opts = append(opts, grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+		MinTime:             0,
+		PermitWithoutStream: true,
+	}))
+	opts = append(opts, grpc.KeepaliveParams(keepalive.ServerParameters{}))
 
 	if v := globalConfig.Server.Certificate; v != nil {
 		cred, err := credentials.NewServerTLSFromFile(v.CertFile, v.KeyFile)
