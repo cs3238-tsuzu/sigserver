@@ -11,6 +11,12 @@ service Listener {
     rpc Connect(ConnectParameters) returns (ConnectResults);
 
     rpc Communicate(stream CommunicateParameters) returns (stream CommunicateResults);
+
+    rpc Ping(PingData) returns (PingData);
+}
+
+message PingData {
+    string Text = 1;
 }
 
 message RegisterParameters {

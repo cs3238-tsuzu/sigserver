@@ -283,6 +283,10 @@ func (h *Handler) Communicate(communicateServer api.Listener_CommunicateServer) 
 	return nil
 }
 
+func (h *Handler) Ping(ctx context.Context, pd *api.PingData) (*api.PingData, error) {
+	return pd, nil
+}
+
 func initHandler(config *Config) (*Handler, *grpc.Server, error) {
 	handler, err := NewHandler(config)
 
